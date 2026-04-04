@@ -13,3 +13,11 @@ services:
     container_name: simulator
     depends_on:
       - mosquitto
+
+  nodered:
+    image: nodered/node-red:latest
+    container_name: nodered
+    ports:
+      - "1880:1880"
+    depends_on:
+      - mosquitto
