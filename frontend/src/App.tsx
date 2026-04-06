@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useCallback, useEffect } from 'react';
 import {
   Activity,
   Gauge,
@@ -6,17 +6,27 @@ import {
   Zap,
 } from 'lucide-react';
 import { KpiCard } from './components/KpiCard';
-import { PowerAreaChart } from './components/PowerAreaChart';
-import { HourlyAverageChart } from './components/HourlyAverageChart';
+import { AlarmHistoryCard } from './components/AlarmHistoryCard';
 import { StatusBadge } from './components/StatusBadge';
-import { sayi, zaman } from './lib/format';
+import { sayi, tarihSaat, zaman } from './lib/format';
 import { useEnergyStream } from './hooks/useEnergyStream';
+
+const PowerAreaChart = lazy(async () => {
+  const mod = await import('./components/PowerAreaChart');
+  return { default: mod.PowerAreaChart };
+});
+
+const HourlyAverageChart = lazy(async () => {
+  const mod = await import('./components/HourlyAverageChart');
+  return { default: mod.HourlyAverageChart };
+});
 
 function App() {
   const {
     sonVeri,
     liveSeries,
     saatlikOrtalama,
+    alarmHistory,
     currentAlertLimit,
     usingMock,
     veriYenile,
@@ -37,19 +47,46 @@ function App() {
 
   const alertAktif = sonVeri.current > currentAlertLimit;
 
+  const alarmGecmisiExport = useCallback(() => {
+    if (alarmHistory.length === 0) {
+      return;
+    }
+
+    const header = ['zaman', 'akim_a', 'gerilim_v', 'guc_w'];
+    const rows = alarmHistory.map((item) => [
+      tarihSaat(item.timestamp),
+      item.current.toFixed(2),
+      item.voltage.toFixed(2),
+      item.power.toFixed(1),
+    ]);
+
+    const csv = [header, ...rows].map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `alarm-gecmisi-${new Date()
+      .toISOString()
+      .replace(/[:.]/g, '-')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [alarmHistory]);
+
   return (
     <main className='min-h-screen bg-panel text-slate-100'>
-      <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8'>
         <header className='mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
           <div>
-            <h1 className='text-3xl font-black tracking-tight text-white'>
+            <h1 className='text-2xl font-black tracking-tight text-white sm:text-3xl'>
               Enerji İzleme Paneli
             </h1>
-            <p className='mt-1 text-sm text-slate-300'>
+            <p className='mt-1 text-xs text-slate-300 sm:text-sm'>
               Son güncelleme: {zaman(sonVeri.timestamp)}
             </p>
           </div>
-          <div className='flex items-center gap-2'>
+          <div className='flex flex-wrap items-center gap-2'>
             <span
               className={[
                 'inline-flex items-center rounded-xl border px-3 py-2 text-xs font-bold tracking-wide',
@@ -87,9 +124,29 @@ function App() {
           </div>
         ) : null}
 
-        <section className='mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2'>
-          <PowerAreaChart data={liveSeries} />
-          <HourlyAverageChart data={saatlikOrtalama} />
+        <section className='mt-6 grid grid-cols-1 gap-4 2xl:grid-cols-2'>
+          <Suspense
+            fallback={
+              <div className='rounded-2xl border border-white/20 bg-white/10 p-5 text-sm text-slate-300'>
+                Grafikler yükleniyor...
+              </div>
+            }
+          >
+            <PowerAreaChart data={liveSeries} />
+          </Suspense>
+          <Suspense
+            fallback={
+              <div className='rounded-2xl border border-white/20 bg-white/10 p-5 text-sm text-slate-300'>
+                Grafikler yükleniyor...
+              </div>
+            }
+          >
+            <HourlyAverageChart data={saatlikOrtalama} />
+          </Suspense>
+        </section>
+
+        <section className='mt-4'>
+          <AlarmHistoryCard alerts={alarmHistory} onExportCsv={alarmGecmisiExport} />
         </section>
       </div>
     </main>

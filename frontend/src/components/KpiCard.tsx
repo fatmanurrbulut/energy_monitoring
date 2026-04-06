@@ -12,14 +12,14 @@ interface KpiCardProps {
 
 export function KpiCard({ title, icon: Icon, value, unit, alert = false }: KpiCardProps) {
   return (
-    <GlassCard title={title} alert={alert} className='min-h-[138px]'>
+    <GlassCard title={title} alert={alert} className='min-h-[120px] sm:min-h-[138px]'>
       <div className='flex items-center justify-between'>
         <div className='rounded-xl bg-white/10 p-3 text-sky-200'>
           <Icon size={22} />
         </div>
         <div className='text-right'>
-          <div className='text-3xl font-extrabold text-white'>{value}</div>
-          {unit ? <div className='mt-1 text-sm text-slate-300'>{unit}</div> : null}
+          <div className='text-2xl font-extrabold text-white sm:text-3xl'>{value}</div>
+          {unit ? <div className='mt-1 text-xs text-slate-300 sm:text-sm'>{unit}</div> : null}
         </div>
       </div>
     </GlassCard>

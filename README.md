@@ -1,42 +1,52 @@
-# Real-Time Electrical Energy Monitoring IoT System
+# Real-Time Energy Monitoring Platform
 
-This repository is the implementation workspace for the CENG436 IoT proposal:
-"Real-Time Electrical Energy Monitoring IoT System Using SCT-013 and ESP8266".
+Dockerized energy monitoring platform with secure MQTT transport, time-series storage, Node-RED flows, and a modern React dashboard.
 
-## Current Architecture
+## Architecture
 
-- `simulator/`: publishes telemetry and device status messages over MQTT
-- `mosquitto/`: MQTT broker configuration
-- `dashboard/flows.json`: Node-RED dashboard flow (live + historical charts)
-- `mosquitto/certs/`: local TLS cert generation script and config
-- `nodered/`: custom Node-RED image with dashboard nodes preinstalled
-- `docker-compose.yml`: runs broker + simulator + dashboard together
+- `simulator/`: generates telemetry and heartbeat/status messages
+- `mosquitto/`: MQTT broker config, authentication, TLS cert scripts
+- `storage_bridge/`: subscribes MQTT telemetry and writes into InfluxDB
+- `influxdb`: time-series database
+- `nodered/`: Node-RED editor/runtime and dashboard flow support
+- `dashboard/flows.json`: tracked Node-RED flow file
+- `frontend/`: React + Tailwind + Recharts UI (dark mode)
+- `docker-compose.yml`: orchestrates all services
 
-Note: `flows_cred.json` is generated automatically inside Node-RED container at startup from `.env` values.
+Note: `flows_cred.json` is generated automatically in Node-RED from `.env` credentials at container startup.
 
 ## Quick Start
 
 ```bash
 cp .env.example .env
-# update secrets in .env
+# update required values in .env
 set -a; source .env; set +a
 ./mosquitto/config/generate-passwd.sh "$MQTT_USERNAME" "$MQTT_PASSWORD"
 ./mosquitto/certs/generate-certs.sh
-docker compose up --build
+docker compose up -d --build
 ```
 
-- MQTT broker (TLS): `localhost:8883`
-- MQTT credentials: loaded from `.env`
-- Node-RED editor/dashboard: `http://localhost:1880`
+## Service Endpoints
+
+- React UI: `http://localhost:1880/ui`
+- Node-RED editor: `http://localhost:1881`
 - InfluxDB UI: `http://localhost:8086`
-  - username/password/org/bucket/token: loaded from `.env`
+- MQTT broker (TLS): `localhost:8883`
+
+## Data Flow
+
+1. `simulator` publishes telemetry to MQTT.
+2. `mosquitto` brokers messages over TLS + auth.
+3. `storage_bridge` consumes telemetry and writes to InfluxDB (`energy_telemetry`).
+4. `frontend` displays live/simulated KPIs, charts, and alarm history.
+5. `nodered` provides flow editing and alternate dashboard/automation logic.
 
 ## MQTT Topics
 
 - Telemetry: `energy/device01/telemetry`
-- Device status / heartbeat: `energy/device01/status`
+- Heartbeat/status: `energy/device01/status`
 
-Telemetry example:
+Telemetry payload example:
 
 ```json
 {
@@ -49,7 +59,7 @@ Telemetry example:
 }
 ```
 
-Status example:
+Status payload example:
 
 ```json
 {
@@ -60,44 +70,37 @@ Status example:
 }
 ```
 
-## Proposal Progress Checklist
+## Verification
 
-Completed now:
-- End-to-end MQTT pipeline (publisher -> broker -> dashboard)
-- Live monitoring widgets (voltage/current/power/status)
-- Basic alert logic in dashboard and simulator payload
-- Publish-subscribe topic structure
-- Device status topic and heartbeat messages
-- Time-series telemetry storage to InfluxDB via MQTT bridge
-- Historical 1-hour average power chart sourced from InfluxDB
-- Mosquitto authentication enabled (`allow_anonymous false`)
-- TLS-enabled MQTT transport (`8883`) with CA-signed server certificate
-- Dockerized setup with persistent Node-RED data volume
-
-Still pending (high priority):
-- Real hardware integration (`SCT-013 + Arduino UNO + ESP8266`)
-- RMS current calculation on microcontroller side
-- Advanced historical analytics/alerts over database data
-- Formal validation scenarios (known load comparison, latency metrics)
-
-Optional extensions pending:
-- Multi-device monitoring
-- Mobile app integration
-- Energy anomaly detection
-
-## Suggested Next Sprint (Actionable)
-
-1. Replace simulator input with real serial data from Arduino.
-2. Connect Node-RED historical chart/query nodes to InfluxDB.
-3. Add test coverage for TLS reconnect and certificate rotation.
-4. Add a test log/report for calibration and end-to-end latency.
-
-## Verify Database Writes
-
-After `docker compose up --build`, run:
+Check pipeline health:
 
 ```bash
-docker logs -f storage_bridge
+docker compose ps
+docker logs --tail 80 mosquitto
+docker logs --tail 80 storage_bridge
+docker logs --tail 80 nodered
 ```
 
-You should see lines like: `Stored telemetry for device=device01`.
+Verify recent Influx writes:
+
+```bash
+set -a; source .env; set +a
+docker exec influxdb influx query \
+'from(bucket:"energy-bucket") |> range(start: -5m) |> filter(fn: (r) => r._measurement == "energy_telemetry") |> limit(n: 10)' \
+--org "$INFLUX_ORG" --token "$INFLUX_TOKEN"
+```
+
+## Current Scope
+
+- Secure MQTT (TLS + username/password)
+- Live telemetry simulation
+- InfluxDB storage bridge
+- React dashboard (KPI, charts, alarm history, CSV export)
+- Node-RED integration and editable flows
+
+## Next Steps
+
+1. Connect real hardware source instead of simulator.
+2. Replace mock frontend stream with WebSocket/MQTT live feed.
+3. Add automated integration tests for reconnect/auth/cert rotation.
+4. Add retention policies and alert rules on InfluxDB side.
