@@ -95,6 +95,15 @@ services:
       - ./dashboard:/data/custom_dashboard
       - ./mosquitto/certs:/certs:ro
 
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    depends_on:
+      - nodered
+    ports:
+      - "${FRONTEND_PORT:-5180}:80"
+
 volumes:
   mosquitto_data:
   mosquitto_log:
