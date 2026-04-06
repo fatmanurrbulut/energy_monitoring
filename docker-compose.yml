@@ -6,6 +6,7 @@ services:
       - "1883:1883"
     volumes:
       - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/config/passwd:/mosquitto/config/passwd
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
 
@@ -24,9 +25,8 @@ services:
       - PUBLISH_INTERVAL_SEC=2
       - HEARTBEAT_INTERVAL_SEC=10
       - ALERT_CURRENT_THRESHOLD=15
-      # Uncomment when mosquitto authentication is enabled:
-      # - MQTT_USERNAME=device01
-      # - MQTT_PASSWORD=change-me
+      - MQTT_USERNAME=device01
+      - MQTT_PASSWORD=energy-2026-secure
 
   influxdb:
     image: influxdb:2.7
@@ -55,6 +55,8 @@ services:
       - BROKER_HOST=mosquitto
       - BROKER_PORT=1883
       - MQTT_TOPIC=energy/+/telemetry
+      - MQTT_USERNAME=device01
+      - MQTT_PASSWORD=energy-2026-secure
       - INFLUX_URL=http://influxdb:8086
       - INFLUX_TOKEN=energy-super-token
       - INFLUX_ORG=energy-org
@@ -72,6 +74,7 @@ services:
     volumes:
       - nodered_data:/data
       - ./dashboard/flows.json:/data/flows.json
+      - ./dashboard/flows_cred.json:/data/flows_cred.json
 
 volumes:
   mosquitto_data:

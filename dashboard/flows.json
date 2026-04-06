@@ -42,6 +42,8 @@
     "willRetain": "false",
     "willPayload": "",
     "willMsg": {},
+    "username": "device01",
+    "password": "energy-2026-secure",
     "userProps": "",
     "sessionExpiry": ""
   },

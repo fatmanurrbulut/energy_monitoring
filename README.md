@@ -8,6 +8,7 @@ This repository is the implementation workspace for the CENG436 IoT proposal:
 - `simulator/`: publishes telemetry and device status messages over MQTT
 - `mosquitto/`: MQTT broker configuration
 - `dashboard/flows.json`: Node-RED dashboard flow (live + historical charts)
+- `dashboard/flows_cred.json`: Node-RED MQTT credentials file
 - `nodered/`: custom Node-RED image with dashboard nodes preinstalled
 - `docker-compose.yml`: runs broker + simulator + dashboard together
 
@@ -18,6 +19,9 @@ docker compose up --build
 ```
 
 - MQTT broker: `localhost:1883`
+- MQTT credentials:
+  - username: `device01`
+  - password: `energy-2026-secure`
 - Node-RED editor/dashboard: `http://localhost:1880`
 - InfluxDB UI: `http://localhost:8086`
   - username: `admin`
@@ -64,13 +68,13 @@ Completed now:
 - Device status topic and heartbeat messages
 - Time-series telemetry storage to InfluxDB via MQTT bridge
 - Historical 1-hour average power chart sourced from InfluxDB
+- Mosquitto authentication enabled (`allow_anonymous false`)
 - Dockerized setup with persistent Node-RED data volume
 
 Still pending (high priority):
 - Real hardware integration (`SCT-013 + Arduino UNO + ESP8266`)
 - RMS current calculation on microcontroller side
 - Advanced historical analytics/alerts over database data
-- MQTT broker authentication enforcement (`allow_anonymous false`)
 - TLS-enabled MQTT path
 - Formal validation scenarios (known load comparison, latency metrics)
 
@@ -83,7 +87,7 @@ Optional extensions pending:
 
 1. Replace simulator input with real serial data from Arduino.
 2. Connect Node-RED historical chart/query nodes to InfluxDB.
-3. Lock down mosquitto with username/password, then test reconnect paths.
+3. Add TLS on mosquitto (`8883`) and migrate clients.
 4. Add a test log/report for calibration and end-to-end latency.
 
 ## Verify Database Writes
