@@ -89,6 +89,7 @@ services:
       - INFLUX_ORG=${INFLUX_ORG}
       - INFLUX_BUCKET=${INFLUX_BUCKET}
       - DEVICE_ID=${DEVICE_ID:-device01}
+      - NODE_RED_CREDENTIAL_SECRET=${NODE_RED_CREDENTIAL_SECRET}
     volumes:
       - nodered_data:/data
       - ./dashboard/flows.json:/data/flows.json

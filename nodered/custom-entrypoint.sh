@@ -12,4 +12,14 @@ if [ -n "${MQTT_USERNAME:-}" ] && [ -n "${MQTT_PASSWORD:-}" ]; then
 CRED
 fi
 
+if [ -n "${NODE_RED_CREDENTIAL_SECRET:-}" ] && [ -f /data/settings.js ]; then
+  ESCAPED_SECRET=$(printf '%s' "${NODE_RED_CREDENTIAL_SECRET}" | sed -e 's/[\/&]/\\&/g')
+
+  if grep -q '^    //credentialSecret:' /data/settings.js; then
+    sed -i "s#^    //credentialSecret: .*#    credentialSecret: \"${ESCAPED_SECRET}\",#" /data/settings.js
+  elif grep -q '^    credentialSecret:' /data/settings.js; then
+    sed -i "s#^    credentialSecret: .*#    credentialSecret: \"${ESCAPED_SECRET}\",#" /data/settings.js
+  fi
+fi
+
 exec ./entrypoint.sh "$@"

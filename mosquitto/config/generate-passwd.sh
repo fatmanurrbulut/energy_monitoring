@@ -15,5 +15,5 @@ docker run --rm \
   eclipse-mosquitto:2 \
   sh -lc "mosquitto_passwd -b -c /work/passwd '${USERNAME}' '${PASSWORD}'"
 
-chmod 644 "${CONFIG_DIR}/passwd"
+chmod 600 "${CONFIG_DIR}/passwd"
 echo "Generated ${CONFIG_DIR}/passwd for user ${USERNAME}"
