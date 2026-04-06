@@ -43,6 +43,8 @@
     "willRetain": "false",
     "willPayload": "",
     "willMsg": {},
+    "user": "${MQTT_USERNAME}",
+    "password": "${MQTT_PASSWORD}",
     "userProps": "",
     "sessionExpiry": ""
   },
@@ -74,9 +76,9 @@
     "theme": {
       "name": "theme-light",
       "lightTheme": {
-        "default": "#0f766e",
-        "baseColor": "#0f766e",
-        "baseFont": "Manrope, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "default": "#0094CE",
+        "baseColor": "#0094CE",
+        "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
         "edited": true,
         "reset": false
       },
@@ -90,20 +92,20 @@
         "name": "Untitled Theme 1",
         "default": "#4B7930",
         "baseColor": "#4B7930",
-        "baseFont": "Manrope, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+        "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
       },
       "themeState": {
         "base-color": {
-          "default": "#0f766e",
-          "value": "#0f766e",
+          "default": "#0094CE",
+          "value": "#0094CE",
           "edited": false
         },
         "page-titlebar-backgroundColor": {
-          "value": "#0f766e",
+          "value": "#0094CE",
           "edited": false
         },
         "page-backgroundColor": {
-          "value": "#eef2f7",
+          "value": "#fafafa",
           "edited": false
         },
         "page-sidebar-backgroundColor": {
@@ -111,11 +113,11 @@
           "edited": false
         },
         "group-textColor": {
-          "value": "#0f766e",
+          "value": "#1bbfff",
           "edited": false
         },
         "group-borderColor": {
-          "value": "#dbe5ef",
+          "value": "#ffffff",
           "edited": false
         },
         "group-backgroundColor": {
@@ -131,11 +133,11 @@
           "edited": false
         },
         "widget-borderColor": {
-          "value": "#dbe5ef",
+          "value": "#ffffff",
           "edited": false
         },
         "base-font": {
-          "value": "Manrope, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
         }
       },
       "angularTheme": {
@@ -662,27 +664,6 @@
     "x": 1230,
     "y": 860,
     "wires": []
-  },
-  {
-    "id": "c0d19e2f3a4b5c6d",
-    "type": "ui_template",
-    "z": "f6f2187d.f17ca8",
-    "group": "",
-    "name": "Global Dashboard Style",
-    "order": 0,
-    "width": 0,
-    "height": 0,
-    "format": "<style>@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap'); .nr-dashboard-theme md-toolbar{box-shadow:0 8px 20px rgba(15,118,110,.22)!important} .nr-dashboard-theme .nr-dashboard-card{border-radius:16px!important;box-shadow:0 8px 24px rgba(15,23,42,.08)!important;border:1px solid #dbe5ef!important;overflow:hidden} .nr-dashboard-theme .nr-dashboard-cardtitle{font-weight:800!important;letter-spacing:.1px} .nr-dashboard-theme .nr-dashboard-cardcontainer{padding:14px 16px!important} .nr-dashboard-theme md-card-content{padding:8px 6px 10px!important} .nr-dashboard-theme .value{font-weight:800!important} </style>",
-    "storeOutMessages": false,
-    "fwdInMessages": false,
-    "resendOnRefresh": true,
-    "templateScope": "global",
-    "className": "",
-    "x": 1230,
-    "y": 940,
-    "wires": [
-      []
-    ]
   },
   {
     "id": "9fe7dd53f21b3539",

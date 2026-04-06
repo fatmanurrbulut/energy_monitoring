@@ -1,6 +1,12 @@
 #!/usr/bin/env sh
 set -eu
 
+# Always sync tracked dashboard flow into /data at container start.
+# This keeps runtime flow deterministic even when named volume has stale data.
+if [ -f /data/custom_dashboard/flows.json ]; then
+  cp /data/custom_dashboard/flows.json /data/flows.json
+fi
+
 if [ -n "${MQTT_USERNAME:-}" ] && [ -n "${MQTT_PASSWORD:-}" ]; then
   cat > /data/flows_cred.json <<CRED
 {
