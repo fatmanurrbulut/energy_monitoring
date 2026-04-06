@@ -79,7 +79,7 @@ services:
       context: ./nodered
     container_name: nodered
     ports:
-      - "1880:1880"
+      - "${NODERED_PORT:-1881}:1880"
     depends_on:
       - mosquitto
     environment:
@@ -102,7 +102,7 @@ services:
     depends_on:
       - nodered
     ports:
-      - "${FRONTEND_PORT:-5180}:80"
+      - "${FRONTEND_PORT:-1880}:80"
 
 volumes:
   mosquitto_data:
