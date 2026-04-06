@@ -6,6 +6,8 @@ services:
       - "1883:1883"
     volumes:
       - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
 
   simulator:
     build:
@@ -13,6 +15,18 @@ services:
     container_name: simulator
     depends_on:
       - mosquitto
+    environment:
+      - BROKER_HOST=mosquitto
+      - BROKER_PORT=1883
+      - DEVICE_ID=device01
+      - TOPIC_TELEMETRY=energy/device01/telemetry
+      - TOPIC_STATUS=energy/device01/status
+      - PUBLISH_INTERVAL_SEC=2
+      - HEARTBEAT_INTERVAL_SEC=10
+      - ALERT_CURRENT_THRESHOLD=15
+      # Uncomment when mosquitto authentication is enabled:
+      # - MQTT_USERNAME=device01
+      # - MQTT_PASSWORD=change-me
 
   nodered:
     image: nodered/node-red:latest
@@ -21,3 +35,10 @@ services:
       - "1880:1880"
     depends_on:
       - mosquitto
+    volumes:
+      - nodered_data:/data
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  nodered_data:
