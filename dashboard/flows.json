@@ -170,7 +170,7 @@
     "type": "ui_group",
     "name": "Live Data",
     "tab": "878c18dd02044916",
-    "order": 1,
+    "order": 2,
     "disp": true,
     "width": 6,
     "collapse": false,
@@ -181,9 +181,9 @@
     "type": "ui_group",
     "name": "Charts",
     "tab": "878c18dd02044916",
-    "order": 2,
+    "order": 3,
     "disp": true,
-    "width": 6,
+    "width": 8,
     "collapse": false,
     "className": ""
   },
@@ -192,9 +192,20 @@
     "type": "ui_group",
     "name": "Warnings",
     "tab": "878c18dd02044916",
-    "order": 3,
+    "order": 4,
     "disp": true,
-    "width": 6,
+    "width": 4,
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "a1f4c3b2e9d87710",
+    "type": "ui_group",
+    "name": "Getting Started",
+    "tab": "878c18dd02044916",
+    "order": 1,
+    "disp": true,
+    "width": 24,
     "collapse": false,
     "className": ""
   },
@@ -231,7 +242,8 @@
         "67c549c870a3cff6",
         "9ad4beb2bee76de1",
         "8b6a33565957a44f",
-        "e5ce735d24d3ccda"
+        "e5ce735d24d3ccda",
+        "e5d7f9a1b3c46802"
       ]
     ]
   },
@@ -500,7 +512,7 @@
     "type": "ui_group",
     "name": "History",
     "tab": "878c18dd02044916",
-    "order": 4,
+    "order": 5,
     "disp": true,
     "width": 6,
     "collapse": false,
@@ -594,7 +606,8 @@
         "4a0787865d9a6f52"
       ],
       [
-        "dd90dfe6d56b2f2f"
+        "dd90dfe6d56b2f2f",
+        "f6e8a0b2c4d57913"
       ]
     ]
   },
@@ -661,6 +674,113 @@
     "color": "#000000",
     "x": 1230,
     "y": 860,
+    "wires": []
+  },
+  {
+    "id": "e5d7f9a1b3c46802",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "Build Onboarding Status",
+    "func": "const payload = msg.payload || {};\nconst now = Date.now();\nconst ts = payload.ts ? new Date(payload.ts) : new Date(now);\nconst ageSec = Math.max(0, Math.round((now - ts.getTime()) / 1000));\n\nlet liveMessage = \"Live telemetry: Waiting for device data\";\nif (payload && typeof payload === \"object\" && payload.device_id) {\n    liveMessage = `Live telemetry: Connected (${payload.device_id})`;\n}\n\nconst lastUpdateMessage = `Last update: ${ts.toLocaleTimeString()} (${ageSec}s ago)`;\nreturn [{ payload: liveMessage }, { payload: lastUpdateMessage }];",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 590,
+    "y": 240,
+    "wires": [
+      [
+        "c3b5d7e9f1a24680"
+      ],
+      [
+        "d4c6e8f0a2b35791"
+      ]
+    ]
+  },
+  {
+    "id": "b2a4d6f8c0e13579",
+    "type": "ui_template",
+    "z": "f6f2187d.f17ca8",
+    "group": "a1f4c3b2e9d87710",
+    "name": "First User Guide",
+    "order": 0,
+    "width": 24,
+    "height": 3,
+    "format": "<div style=\"padding:10px 4px; line-height:1.5;\">\\n  <div style=\"font-size:20px; font-weight:700; margin-bottom:6px;\">Welcome</div>\\n  <div style=\"font-size:14px; opacity:0.9; margin-bottom:8px;\">This screen is designed for a first-time operator. If the three checks below are green, the pipeline is healthy.</div>\\n  <div style=\"font-size:14px;\">\\n    1. <b>Live telemetry</b> should show Connected.\\n    <br>2. <b>History query</b> should report refreshed points.\\n    <br>3. <b>Warnings</b> should stay Normal under expected load.\\n  </div>\\n</div>",
+    "storeOutMessages": true,
+    "fwdInMessages": false,
+    "resendOnRefresh": true,
+    "templateScope": "local",
+    "className": "",
+    "x": 230,
+    "y": 980,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "c3b5d7e9f1a24680",
+    "type": "ui_text",
+    "z": "f6f2187d.f17ca8",
+    "group": "a1f4c3b2e9d87710",
+    "order": 1,
+    "width": 8,
+    "height": 0,
+    "name": "",
+    "label": "Live Feed",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 14,
+    "color": "#000000",
+    "x": 890,
+    "y": 920,
+    "wires": []
+  },
+  {
+    "id": "d4c6e8f0a2b35791",
+    "type": "ui_text",
+    "z": "f6f2187d.f17ca8",
+    "group": "a1f4c3b2e9d87710",
+    "order": 2,
+    "width": 8,
+    "height": 0,
+    "name": "",
+    "label": "Last Update",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 14,
+    "color": "#000000",
+    "x": 890,
+    "y": 960,
+    "wires": []
+  },
+  {
+    "id": "f6e8a0b2c4d57913",
+    "type": "ui_text",
+    "z": "f6f2187d.f17ca8",
+    "group": "a1f4c3b2e9d87710",
+    "order": 3,
+    "width": 8,
+    "height": 0,
+    "name": "",
+    "label": "History Query",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 14,
+    "color": "#000000",
+    "x": 890,
+    "y": 1000,
     "wires": []
   },
   {
