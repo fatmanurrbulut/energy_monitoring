@@ -7,6 +7,12 @@ if [ -f /data/custom_dashboard/flows.json ]; then
   cp /data/custom_dashboard/flows.json /data/flows.json
 fi
 
+# On a fresh named volume, Node-RED's default settings file may not exist yet.
+# Seed it up front so auth and credential settings can be applied deterministically.
+if [ ! -f /data/settings.js ] && [ -f /usr/src/node-red/node_modules/node-red/settings.js ]; then
+  cp /usr/src/node-red/node_modules/node-red/settings.js /data/settings.js
+fi
+
 if [ -n "${MQTT_USERNAME:-}" ] && [ -n "${MQTT_PASSWORD:-}" ]; then
   cat > /data/flows_cred.json <<CRED
 {
