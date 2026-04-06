@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap');
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Sora, system-ui, -apple-system, Segoe UI, sans-serif;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.18), transparent 32%),
+    radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.14), transparent 36%),
+    #0f172a;
+}
+
+#root {
+  min-height: 100vh;
+}
