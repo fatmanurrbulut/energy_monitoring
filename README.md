@@ -18,6 +18,11 @@ docker compose up --build
 
 - MQTT broker: `localhost:1883`
 - Node-RED editor/dashboard: `http://localhost:1880`
+- InfluxDB UI: `http://localhost:8086`
+  - username: `admin`
+  - password: `admin12345`
+  - org: `energy-org`
+  - bucket: `energy-bucket`
 
 ## MQTT Topics
 
@@ -56,12 +61,12 @@ Completed now:
 - Basic alert logic in dashboard and simulator payload
 - Publish-subscribe topic structure
 - Device status topic and heartbeat messages
+- Time-series telemetry storage to InfluxDB via MQTT bridge
 - Dockerized setup with persistent Node-RED data volume
 
 Still pending (high priority):
 - Real hardware integration (`SCT-013 + Arduino UNO + ESP8266`)
 - RMS current calculation on microcontroller side
-- Database integration for historical time-series storage (`InfluxDB` or `PostgreSQL`)
 - Dashboard historical analytics fed from database (not only live stream)
 - MQTT broker authentication enforcement (`allow_anonymous false`)
 - TLS-enabled MQTT path
@@ -75,6 +80,16 @@ Optional extensions pending:
 ## Suggested Next Sprint (Actionable)
 
 1. Replace simulator input with real serial data from Arduino.
-2. Add InfluxDB service and write MQTT measurements to DB via Node-RED.
+2. Connect Node-RED historical chart/query nodes to InfluxDB.
 3. Lock down mosquitto with username/password, then test reconnect paths.
 4. Add a test log/report for calibration and end-to-end latency.
+
+## Verify Database Writes
+
+After `docker compose up --build`, run:
+
+```bash
+docker logs -f storage_bridge
+```
+
+You should see lines like: `Stored telemetry for device=device01`.
