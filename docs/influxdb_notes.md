@@ -3,9 +3,9 @@
 ## Service
 
 - URL: `http://localhost:8086`
-- Org: `energy-org`
-- Bucket: `energy-bucket`
-- Token: `energy-super-token`
+- Org: from `.env` -> `INFLUX_ORG`
+- Bucket: from `.env` -> `INFLUX_BUCKET`
+- Token: from `.env` -> `INFLUX_TOKEN`
 
 ## MQTT -> Influx Bridge
 

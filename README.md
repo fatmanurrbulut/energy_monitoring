@@ -8,26 +8,28 @@ This repository is the implementation workspace for the CENG436 IoT proposal:
 - `simulator/`: publishes telemetry and device status messages over MQTT
 - `mosquitto/`: MQTT broker configuration
 - `dashboard/flows.json`: Node-RED dashboard flow (live + historical charts)
-- `dashboard/flows_cred.json`: Node-RED MQTT credentials file
+- `mosquitto/certs/`: local TLS cert generation script and config
 - `nodered/`: custom Node-RED image with dashboard nodes preinstalled
 - `docker-compose.yml`: runs broker + simulator + dashboard together
+
+Note: `flows_cred.json` is generated automatically inside Node-RED container at startup from `.env` values.
 
 ## Quick Start
 
 ```bash
+cp .env.example .env
+# update secrets in .env
+set -a; source .env; set +a
+./mosquitto/config/generate-passwd.sh "$MQTT_USERNAME" "$MQTT_PASSWORD"
+./mosquitto/certs/generate-certs.sh
 docker compose up --build
 ```
 
-- MQTT broker: `localhost:1883`
-- MQTT credentials:
-  - username: `device01`
-  - password: `energy-2026-secure`
+- MQTT broker (TLS): `localhost:8883`
+- MQTT credentials: loaded from `.env`
 - Node-RED editor/dashboard: `http://localhost:1880`
 - InfluxDB UI: `http://localhost:8086`
-  - username: `admin`
-  - password: `admin12345`
-  - org: `energy-org`
-  - bucket: `energy-bucket`
+  - username/password/org/bucket/token: loaded from `.env`
 
 ## MQTT Topics
 
@@ -69,13 +71,13 @@ Completed now:
 - Time-series telemetry storage to InfluxDB via MQTT bridge
 - Historical 1-hour average power chart sourced from InfluxDB
 - Mosquitto authentication enabled (`allow_anonymous false`)
+- TLS-enabled MQTT transport (`8883`) with CA-signed server certificate
 - Dockerized setup with persistent Node-RED data volume
 
 Still pending (high priority):
 - Real hardware integration (`SCT-013 + Arduino UNO + ESP8266`)
 - RMS current calculation on microcontroller side
 - Advanced historical analytics/alerts over database data
-- TLS-enabled MQTT path
 - Formal validation scenarios (known load comparison, latency metrics)
 
 Optional extensions pending:
@@ -87,7 +89,7 @@ Optional extensions pending:
 
 1. Replace simulator input with real serial data from Arduino.
 2. Connect Node-RED historical chart/query nodes to InfluxDB.
-3. Add TLS on mosquitto (`8883`) and migrate clients.
+3. Add test coverage for TLS reconnect and certificate rotation.
 4. Add a test log/report for calibration and end-to-end latency.
 
 ## Verify Database Writes

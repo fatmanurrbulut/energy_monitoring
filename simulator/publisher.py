@@ -12,6 +12,9 @@ TOPIC_TELEMETRY = os.getenv("TOPIC_TELEMETRY", f"energy/{DEVICE_ID}/telemetry")
 TOPIC_STATUS = os.getenv("TOPIC_STATUS", f"energy/{DEVICE_ID}/status")
 MQTT_USERNAME = os.getenv("MQTT_USERNAME")
 MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
+MQTT_USE_TLS = os.getenv("MQTT_USE_TLS", "false").lower() == "true"
+MQTT_TLS_CA_CERT = os.getenv("MQTT_TLS_CA_CERT")
+MQTT_TLS_INSECURE = os.getenv("MQTT_TLS_INSECURE", "false").lower() == "true"
 PUBLISH_INTERVAL_SEC = float(os.getenv("PUBLISH_INTERVAL_SEC", "2"))
 HEARTBEAT_INTERVAL_SEC = float(os.getenv("HEARTBEAT_INTERVAL_SEC", "10"))
 ALERT_CURRENT_THRESHOLD = float(os.getenv("ALERT_CURRENT_THRESHOLD", "15"))
@@ -26,6 +29,13 @@ def build_client():
 
     if MQTT_USERNAME and MQTT_PASSWORD:
         client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+
+    if MQTT_USE_TLS:
+        if MQTT_TLS_CA_CERT:
+            client.tls_set(ca_certs=MQTT_TLS_CA_CERT)
+        else:
+            client.tls_set()
+        client.tls_insecure_set(MQTT_TLS_INSECURE)
 
     # Broker can mark device offline if connection drops unexpectedly.
     client.will_set(
