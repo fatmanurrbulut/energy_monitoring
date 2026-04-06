@@ -74,6 +74,19 @@ services:
     volumes:
       - ./mosquitto/certs:/certs:ro
 
+  alarm_api:
+    build:
+      context: ./alarm_api
+    container_name: alarm_api
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - INFLUX_ORG=${INFLUX_ORG}
+      - INFLUX_BUCKET=${INFLUX_BUCKET}
+      - DEVICE_ID=${DEVICE_ID:-device01}
+
   nodered:
     build:
       context: ./nodered
@@ -90,6 +103,8 @@ services:
       - INFLUX_BUCKET=${INFLUX_BUCKET}
       - DEVICE_ID=${DEVICE_ID:-device01}
       - NODE_RED_CREDENTIAL_SECRET=${NODE_RED_CREDENTIAL_SECRET}
+      - NODERED_ADMIN_USERNAME=${NODERED_ADMIN_USERNAME:-admin}
+      - NODERED_ADMIN_PASSWORD=${NODERED_ADMIN_PASSWORD:-change-me}
     volumes:
       - nodered_data:/data
       - ./dashboard:/data/custom_dashboard
@@ -100,6 +115,7 @@ services:
       context: ./frontend
     container_name: frontend
     depends_on:
+      - alarm_api
       - nodered
     ports:
       - "${FRONTEND_PORT:-1880}:80"

@@ -42,6 +42,14 @@ const toHourlyAverage = (rows: EnergyReading[]): HourlyPoint[] => {
     .slice(-12);
 };
 
+const mergeAlerts = (current: AlertEvent[], incoming: AlertEvent[]): AlertEvent[] => {
+  const byId = new Map<string, AlertEvent>();
+  [...current, ...incoming].forEach((item) => byId.set(item.id, item));
+  return Array.from(byId.values())
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 200);
+};
+
 export function useEnergyStream() {
   const initialSeries = useMemo(() => Array.from({ length: 20 }, generateReading), []);
   const [liveSeries, setLiveSeries] = useState<EnergyReading[]>(initialSeries);
@@ -84,6 +92,41 @@ export function useEnergyStream() {
   const veriYenile = useCallback(() => {
     pushReading(generateReading());
   }, [pushReading]);
+
+  const alarmGecmisiYukle = useCallback(async () => {
+    try {
+      const response = await fetch('/api/alarms?hours=24&limit=200');
+      if (!response.ok) {
+        return;
+      }
+      const data = await response.json();
+      const incoming = Array.isArray(data?.alarms)
+        ? data.alarms
+            .map((item: any): AlertEvent | null => {
+              if (typeof item?.timestamp !== 'number') {
+                return null;
+              }
+              return {
+                id: String(item.id ?? `${item.timestamp}-${item.current ?? 0}`),
+                timestamp: item.timestamp,
+                current: Number(item.current ?? 0),
+                voltage: Number(item.voltage ?? 0),
+                power: Number(item.power ?? 0),
+              };
+            })
+            .filter(Boolean) as AlertEvent[]
+        : [];
+      setAlarmHistory((prev) => mergeAlerts(prev, incoming));
+    } catch {
+      // Keep local alarm state when API is unavailable.
+    }
+  }, []);
+
+  useEffect(() => {
+    alarmGecmisiYukle();
+    const t = setInterval(alarmGecmisiYukle, 10000);
+    return () => clearInterval(t);
+  }, [alarmGecmisiYukle]);
 
   useEffect(() => {
     if (!wsUrl) {

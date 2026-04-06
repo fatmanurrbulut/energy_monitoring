@@ -28,4 +28,47 @@ if [ -n "${NODE_RED_CREDENTIAL_SECRET:-}" ] && [ -f /data/settings.js ]; then
   fi
 fi
 
+if [ -n "${NODERED_ADMIN_USERNAME:-}" ] && [ -n "${NODERED_ADMIN_PASSWORD:-}" ] && [ -f /data/settings.js ]; then
+  ADMIN_HASH=$(node -e "console.log(require('bcryptjs').hashSync(process.env.NODERED_ADMIN_PASSWORD, 8))")
+
+  awk -v user="${NODERED_ADMIN_USERNAME}" -v pass="${ADMIN_HASH}" '
+    BEGIN { replaced=0; skip=0 }
+    /^    \/\/adminAuth: \{/ && replaced==0 {
+      print "    adminAuth: {"
+      print "        type: \"credentials\","
+      print "        users: [{"
+      print "            username: \"" user "\","
+      print "            password: \"" pass "\","
+      print "            permissions: \"*\""
+      print "        }]"
+      print "    },"
+      replaced=1
+      skip=1
+      next
+    }
+    /^    adminAuth: \{/ && replaced==0 {
+      print "    adminAuth: {"
+      print "        type: \"credentials\","
+      print "        users: [{"
+      print "            username: \"" user "\","
+      print "            password: \"" pass "\","
+      print "            permissions: \"*\""
+      print "        }]"
+      print "    },"
+      replaced=1
+      skip=2
+      next
+    }
+    skip==1 {
+      if ($0 ~ /^    \/\/},/) { skip=0 }
+      next
+    }
+    skip==2 {
+      if ($0 ~ /^    },/) { skip=0 }
+      next
+    }
+    { print }
+  ' /data/settings.js > /data/settings.js.tmp && mv /data/settings.js.tmp /data/settings.js
+fi
+
 exec ./entrypoint.sh "$@"
