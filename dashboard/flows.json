@@ -481,6 +481,174 @@
     "wires": []
   },
   {
+    "id": "f7a8d05f8f3ecdc1",
+    "type": "ui_group",
+    "name": "History",
+    "tab": "878c18dd02044916",
+    "order": 4,
+    "disp": true,
+    "width": 6,
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "90e58c1dcd2b5a9b",
+    "type": "inject",
+    "z": "f6f2187d.f17ca8",
+    "name": "Refresh historical chart",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "30",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "3",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 260,
+    "y": 820,
+    "wires": [
+      [
+        "42dc76c638ea8ac3"
+      ]
+    ]
+  },
+  {
+    "id": "42dc76c638ea8ac3",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "Build Flux Query",
+    "func": "msg.method = \"POST\";\nmsg.url = \"http://influxdb:8086/api/v2/query?org=energy-org\";\nmsg.headers = {\n    \"Authorization\": \"Token energy-super-token\",\n    \"Content-Type\": \"application/vnd.flux\",\n    \"Accept\": \"application/csv\"\n};\nmsg.payload = `from(bucket: \"energy-bucket\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"energy_telemetry\")\n  |> filter(fn: (r) => r._field == \"power_est\")\n  |> filter(fn: (r) => r.device_id == \"device01\")\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")`;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 510,
+    "y": 820,
+    "wires": [
+      [
+        "750748f0d5effc9a"
+      ]
+    ]
+  },
+  {
+    "id": "750748f0d5effc9a",
+    "type": "http request",
+    "z": "f6f2187d.f17ca8",
+    "name": "Influx Query",
+    "method": "use",
+    "ret": "txt",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 730,
+    "y": 820,
+    "wires": [
+      [
+        "33be2ee7c45db1ad"
+      ]
+    ]
+  },
+  {
+    "id": "33be2ee7c45db1ad",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "CSV to Chart Data",
+    "func": "const raw = (msg.payload || \"\").toString();\nconst lines = raw.split(\"\\n\").filter(line => line && !line.startsWith(\"#\"));\n\nif (lines.length < 2) {\n    return [null, { payload: \"No historical data in last 1h\" }];\n}\n\nconst headers = lines[0].split(\",\");\nconst timeIndex = headers.indexOf(\"_time\");\nconst valueIndex = headers.indexOf(\"_value\");\n\nif (timeIndex === -1 || valueIndex === -1) {\n    return [null, { payload: \"Influx response parse error\" }];\n}\n\nconst points = [];\nfor (let i = 1; i < lines.length; i++) {\n    const cols = lines[i].split(\",\");\n    const t = cols[timeIndex];\n    const v = parseFloat(cols[valueIndex]);\n\n    if (!t || Number.isNaN(v)) {\n        continue;\n    }\n\n    points.push({ x: new Date(t).getTime(), y: v });\n}\n\nif (points.length === 0) {\n    return [null, { payload: \"No points parsed from Influx\" }];\n}\n\nconst chartMsg = {\n    payload: [\n        {\n            series: [\"1m Avg Power (W)\"],\n            data: [points],\n            labels: [\"\"]\n        }\n    ]\n};\n\nconst infoMsg = {\n    payload: `History updated: ${points.length} points (last 1h)`\n};\n\nreturn [chartMsg, infoMsg];",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 820,
+    "wires": [
+      [
+        "4a0787865d9a6f52"
+      ],
+      [
+        "dd90dfe6d56b2f2f"
+      ]
+    ]
+  },
+  {
+    "id": "4a0787865d9a6f52",
+    "type": "ui_chart",
+    "z": "f6f2187d.f17ca8",
+    "name": "",
+    "group": "f7a8d05f8f3ecdc1",
+    "order": 0,
+    "width": 0,
+    "height": 0,
+    "label": "Last 1h Avg Power",
+    "chartType": "line",
+    "legend": "false",
+    "xformat": "HH:mm",
+    "interpolate": "linear",
+    "nodata": "",
+    "dot": false,
+    "ymin": "",
+    "ymax": "",
+    "removeOlder": "2",
+    "removeOlderPoints": "",
+    "removeOlderUnit": "3600",
+    "cutout": 0,
+    "useOneColor": false,
+    "useUTC": false,
+    "colors": [
+      "#2ca02c",
+      "#aec7e8",
+      "#ff7f0e",
+      "#2ca02c",
+      "#98df8a",
+      "#d62728",
+      "#ff9896",
+      "#9467bd",
+      "#c5b0d5"
+    ],
+    "outputs": 1,
+    "useDifferentColor": false,
+    "className": "",
+    "x": 1240,
+    "y": 780,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "dd90dfe6d56b2f2f",
+    "type": "ui_text",
+    "z": "f6f2187d.f17ca8",
+    "group": "f7a8d05f8f3ecdc1",
+    "order": 1,
+    "width": 0,
+    "height": 0,
+    "name": "",
+    "label": "History Status",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 14,
+    "color": "#000000",
+    "x": 1230,
+    "y": 860,
+    "wires": []
+  },
+  {
     "id": "9fe7dd53f21b3539",
     "type": "global-config",
     "env": [],

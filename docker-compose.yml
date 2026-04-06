@@ -62,7 +62,8 @@ services:
       - INFLUX_MEASUREMENT=energy_telemetry
 
   nodered:
-    image: nodered/node-red:latest
+    build:
+      context: ./nodered
     container_name: nodered
     ports:
       - "1880:1880"
@@ -70,6 +71,7 @@ services:
       - mosquitto
     volumes:
       - nodered_data:/data
+      - ./dashboard/flows.json:/data/flows.json
 
 volumes:
   mosquitto_data:

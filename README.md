@@ -7,7 +7,8 @@ This repository is the implementation workspace for the CENG436 IoT proposal:
 
 - `simulator/`: publishes telemetry and device status messages over MQTT
 - `mosquitto/`: MQTT broker configuration
-- `dashboard/flows.json`: Node-RED dashboard flow (live values, chart, alert)
+- `dashboard/flows.json`: Node-RED dashboard flow (live + historical charts)
+- `nodered/`: custom Node-RED image with dashboard nodes preinstalled
 - `docker-compose.yml`: runs broker + simulator + dashboard together
 
 ## Quick Start
@@ -62,12 +63,13 @@ Completed now:
 - Publish-subscribe topic structure
 - Device status topic and heartbeat messages
 - Time-series telemetry storage to InfluxDB via MQTT bridge
+- Historical 1-hour average power chart sourced from InfluxDB
 - Dockerized setup with persistent Node-RED data volume
 
 Still pending (high priority):
 - Real hardware integration (`SCT-013 + Arduino UNO + ESP8266`)
 - RMS current calculation on microcontroller side
-- Dashboard historical analytics fed from database (not only live stream)
+- Advanced historical analytics/alerts over database data
 - MQTT broker authentication enforcement (`allow_anonymous false`)
 - TLS-enabled MQTT path
 - Formal validation scenarios (known load comparison, latency metrics)

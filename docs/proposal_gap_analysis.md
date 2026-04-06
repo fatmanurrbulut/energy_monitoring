@@ -37,8 +37,8 @@ Reference: `230401034_FatmanurBulut_CENG436_IoT_proposal.pdf`
 - Notes: Edge/cloud flow exists with simulator + broker + dashboard; Arduino edge processing path pending.
 
 9. Data Management Plan
-- Status: Partially done
-- Notes: InfluxDB ingestion is implemented through MQTT-to-Influx bridge; dashboard-side historical queries are still pending.
+- Status: Mostly done (baseline)
+- Notes: InfluxDB ingestion and basic historical dashboard chart (last 1h avg power) are implemented; advanced analytics remains.
 
 10. Security & Privacy Considerations (Mandatory)
 - Status: Partially done
@@ -75,6 +75,6 @@ Reference: `230401034_FatmanurBulut_CENG436_IoT_proposal.pdf`
 ## Immediate Next Work Items
 
 1. Real sensor pipeline: Arduino serial output -> ESP8266 -> MQTT.
-2. Dashboard analytics: add historical query widgets over InfluxDB data.
+2. Dashboard analytics: extend historical widgets with richer KPIs and anomaly views.
 3. Security hardening: Mosquitto authentication + TLS.
 4. Validation: create measurable test protocol and test log.
