@@ -92,7 +92,7 @@ services:
       - NODE_RED_CREDENTIAL_SECRET=${NODE_RED_CREDENTIAL_SECRET}
     volumes:
       - nodered_data:/data
-      - ./dashboard:/data/project
+      - ./dashboard:/data/custom_dashboard
       - ./mosquitto/certs:/certs:ro
 
 volumes:
