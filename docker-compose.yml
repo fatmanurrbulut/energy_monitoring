@@ -2,6 +2,7 @@ services:
   mosquitto:
     image: eclipse-mosquitto:2
     container_name: mosquitto
+    restart: unless-stopped
     ports:
       - "${MQTT_TLS_PORT:-8883}:8883"
     volumes:
@@ -15,6 +16,7 @@ services:
     build:
       context: ./simulator
     container_name: simulator
+    restart: unless-stopped
     depends_on:
       - mosquitto
     environment:
@@ -37,6 +39,7 @@ services:
   influxdb:
     image: influxdb:2.7
     container_name: influxdb
+    restart: unless-stopped
     ports:
       - "8086:8086"
     environment:
@@ -49,14 +52,23 @@ services:
     volumes:
       - influxdb_data:/var/lib/influxdb2
       - influxdb_config:/etc/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping", "--host", "http://localhost:8086"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   storage_bridge:
     build:
       context: ./storage_bridge
     container_name: storage_bridge
+    restart: unless-stopped
     depends_on:
-      - mosquitto
-      - influxdb
+      mosquitto:
+        condition: service_started
+      influxdb:
+        condition: service_healthy
     environment:
       - BROKER_HOST=mosquitto
       - BROKER_PORT=${MQTT_BROKER_PORT:-8883}
@@ -78,19 +90,29 @@ services:
     build:
       context: ./alarm_api
     container_name: alarm_api
+    restart: unless-stopped
+    init: true
     depends_on:
-      - influxdb
+      influxdb:
+        condition: service_healthy
     environment:
       - INFLUX_URL=http://influxdb:8086
       - INFLUX_TOKEN=${INFLUX_TOKEN}
       - INFLUX_ORG=${INFLUX_ORG}
       - INFLUX_BUCKET=${INFLUX_BUCKET}
       - DEVICE_ID=${DEVICE_ID:-device01}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
 
   nodered:
     build:
       context: ./nodered
     container_name: nodered
+    restart: unless-stopped
     ports:
       - "${NODERED_PORT:-1881}:1880"
     depends_on:
@@ -114,11 +136,20 @@ services:
     build:
       context: ./frontend
     container_name: frontend
+    restart: unless-stopped
     depends_on:
-      - alarm_api
-      - nodered
+      alarm_api:
+        condition: service_healthy
+      nodered:
+        condition: service_started
     ports:
       - "${FRONTEND_PORT:-1880}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
 
 volumes:
   mosquitto_data:
