@@ -49,12 +49,24 @@ function App() {
               Son güncelleme: {zaman(sonVeri.timestamp)}
             </p>
           </div>
-          <button
-            onClick={veriYenile}
-            className='inline-flex w-fit items-center rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-sky-100 transition hover:bg-white/20'
-          >
-            Veriyi Yenile
-          </button>
+          <div className='flex items-center gap-2'>
+            <span
+              className={[
+                'inline-flex items-center rounded-xl border px-3 py-2 text-xs font-bold tracking-wide',
+                usingMock
+                  ? 'border-amber-300/40 bg-amber-500/15 text-amber-200'
+                  : 'border-emerald-300/40 bg-emerald-500/15 text-emerald-200',
+              ].join(' ')}
+            >
+              {usingMock ? 'Simülasyon Modu (Mock Veri)' : 'Canlı Veri Bağlı'}
+            </span>
+            <button
+              onClick={veriYenile}
+              className='inline-flex w-fit items-center rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-sky-100 transition hover:bg-white/20'
+            >
+              Veriyi Yenile
+            </button>
+          </div>
         </header>
 
         <section className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4'>
